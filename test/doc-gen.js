@@ -39,7 +39,7 @@ describe('doc-gen', function () {
     })
 })
 
-function genCode (solidityCompilerPath, solidityCompilerExtraArgs, contractsPath) {
+function genCode(solidityCompilerPath, solidityCompilerExtraArgs, contractsPath) {
     const commandOutput = shell.exec([
         `${solidityCompilerPath}`,
         `  --pretty-json`,
@@ -52,7 +52,7 @@ function genCode (solidityCompilerPath, solidityCompilerExtraArgs, contractsPath
     return JSON.parse(commandOutput.stdout)
 }
 
-function buildDocs (contracts) {
+function buildDocs(contracts) {
     let contents = {}
     for (const [key, value] of Object.entries(contracts)) {
         const [path, contractName] = key.split(':')
@@ -73,7 +73,7 @@ function buildDocs (contracts) {
     return contents
 }
 
-function writeDocs (contents) {
+function writeDocs(contents) {
     // write side bar
 
     // fs.writeFileSync('./docs/_sidebar.md', contents)
@@ -89,7 +89,7 @@ function writeDocs (contents) {
         }
 
         // loop methods
-        if (value.methods != undefined) {
+        if (value.methods) {
             for (let [k, v] of Object.entries(value.methods)) {
                 let methodC = '#### ' + k + '\n'
                 if (v.details) {
@@ -99,7 +99,10 @@ function writeDocs (contents) {
                 methodC = methodC + '##### Params:\n            '
                 methodC = methodC + JSON.stringify(v.params) + '\n'
                 // set returns
-                methodC + methodC + '#### Returns:\n          ' + v.return
+                if (v.return) {
+                    methodC = methodC + '##### Returns:\n          ' + v.return + "\n"
+                }
+
                 // if (k != 'allowance(address,address)') {
                 //     console.log(v)
                 // }
