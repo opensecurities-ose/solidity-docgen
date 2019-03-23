@@ -1,37 +1,38 @@
-## OpenSecurities Protocol(OSP)
+## OpenSecurities Contract
 
-> The standard security token protocol based on Ethereum
-
-#### What it is
-
-OpenSecurities help security token developers build financial dApps more easily.
-The developer may wanna build dApps like:
-* Token Issuance Platform
-* Generate security tokens and the issuance plan
-* build security token exchange
-* and so on ...
-
-The `OSP` protocol contains two sub protocols:Issuance protocol and Exchange protocol.
-
-#### Features
-
-- Security token standard compatible with ERC-20 and ERC-1410;
-- Support tranches;
-- Role based management;
-- Support MultiSig;
-- Support whitelist;
-- Support plugin policies;
-- Support dividents for bonds;
-- Support force transfer and burns;
-- Exchange security token on chain;
-- Whitelist in exchange contract;
-
-#### What we do
-- Define and implement security token standard
-- Build security token infrastructure and services
-- Provide SDK and API services or guide
-- Develop dApp demos
-- Security Token eco-system operation
+!> The contract code is located in this [git repository](https://github.com/opensecurities-ose/ose-core)
 
 
+## Structure of Contract
 
+
+```text
+.
+└── ose-core
+    ├── contracts //the contract code
+        ├── dex //the dex contracts
+        ├── interfaces
+        ├── libraries
+        ├── modules
+        ├── multisig
+        ├── policies
+        ├── stos
+    ├── play //the playground of the contract interface
+    ├── docs //the docs of OpenSecurities
+    ├── javaDemo //the demo to show how to call the contract
+    ├── test //the test directories
+    ├── utils //some help utils
+    
+```
+
+!> The project depends on `truflle @v4.1.14`, `solidity @v0.4.24`, and `ganache-cli` to simulate the ethereum private network
+
+## Main Contracts
+
+
+?> Let's take look at the frame of contracts
+
+
+![frame of contracts](img/iss_fr.png)
+
+> Now we will dig into the contract code to make it clear how it works

@@ -1,4 +1,4 @@
-- Core Contract
+- Contracts
     - [Dividents](contracts/Dividents.md)
     - [Migrations](contracts/Migrations.md)
     - [PolicyRegistry](contracts/PolicyRegistry.md)
