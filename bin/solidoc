@@ -1,0 +1,36 @@
+#! /usr/bin/env node
+
+var program = require('commander')
+const cutil = require('../src/util/code')
+var version = "0.1.0"
+var fs = require('fs')
+const assert = require('assert')
+const path = require('path')
+program
+    .version(version, '-v, --version')
+    .arguments("<contracts_path>")
+    .option("-o, --output <path>", "the output docs.default is ./docs")
+    .action((contractsPathInput, options) => {
+        const contractsPath = path.resolve(contractsPathInput)
+        assert(fs.existsSync(contractsPath), 'Contracts directory does not exist.')
+        var output = "./docs"
+        if (options.output) {
+            output = options.output
+        }
+        const solidityCompilerPath = cutil.getSolidityCompilerPath(process.env)
+        const solidityCompilerExtraArgs = cutil.getSolidityCompilerExtraArgs(process.env)
+
+        const {
+            contracts,
+            sources
+        } = cutil.genCode(solidityCompilerPath, solidityCompilerExtraArgs, contractsPath)
+
+        var contents = cutil.buildDocs(contracts)
+        cutil.writeDocs(output, contents)
+
+
+        // console.log(contracts["/tmp/dex/Governance.sol:Governance"])
+        // console.log(contents["Governance"])
+    })
+
+program.parse(process.argv)

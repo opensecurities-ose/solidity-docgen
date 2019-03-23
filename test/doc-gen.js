@@ -5,6 +5,7 @@ import fs from 'fs'
 import {buildDocId, buildSectionId} from '../src/gen/util'
 
 const cutil = require('../src/util/code')
+const solc = "ethereum/solc:0.4.24"
 /**
  * Options given to the Solidity compiler when generating the AST.
  */
@@ -22,8 +23,8 @@ const COMBINED_JSON_OPTIONS = [
     'userdoc'
 ]
 describe('doc-gen', function () {
-    it('gen', function () {
-        const contractsPath = './contracts'
+    it('gen', function (done) {
+        const contractsPath = '/Users/charlie/OneRoot/Projects/open-securities/ose-core/contracts'
         const solidityCompilerPath = cutil.getSolidityCompilerPath(process.env)
         const solidityCompilerExtraArgs = cutil.getSolidityCompilerExtraArgs(process.env)
 
@@ -32,21 +33,30 @@ describe('doc-gen', function () {
             sources
         } = genCode(solidityCompilerPath, solidityCompilerExtraArgs, contractsPath)
         // console.log(contracts)
-        var contents = buildDocs(contracts)
-        console.log(contents)
+        // var contents = buildDocs(contracts)
+        // console.log(contents)
+        //
+        // writeDocs(contents)
 
-        writeDocs(contents)
+        done()
     })
 })
 
 function genCode(solidityCompilerPath, solidityCompilerExtraArgs, contractsPath) {
+    //find sol first
+    var res = shell.exec([" find " + contractsPath + " -type f -name \"*.sol\""].join(" "), {silent: true})
+    cutil.handleErrorCode(res)
+    var files = res.stdout.replace(new RegExp(contractsPath, 'g'), "/tmp").replace(new RegExp("\n", 'g'), " ")
+    console.log(files)
     const commandOutput = shell.exec([
-        `${solidityCompilerPath}`,
+        `${solidityCompilerPath} run --rm -v ` + contractsPath + ":/tmp " + solc,
         `  --pretty-json`,
-        `  --allow-paths ${contractsPath}`,
+        "  --ignore-missing",
+        `  --allow-paths /tmp`,
         `  --combined-json ${COMBINED_JSON_OPTIONS.join(',')}`,
         `  ${solidityCompilerExtraArgs}`,
-        `  $(find ${contractsPath} -type f -name "*.sol")`
+        // `  $(find /tmp -type f -name "*.sol")`
+        `  ${files}`
     ].join(' '), {silent: true})
     cutil.handleErrorCode(commandOutput)
     return JSON.parse(commandOutput.stdout)
@@ -74,15 +84,12 @@ function buildDocs(contracts) {
 }
 
 function writeDocs(contents) {
-    // write side bar
-
-    // fs.writeFileSync('./docs/_sidebar.md', contents)
     var side = '- Core Contract\n'
     for (let [key, value] of Object.entries(contents)) { // loop each contract
-        side = side + '    - [' + key + '](' + key + '.md)\n'
+        side = side + '    - [' + key + '](contracts/' + key + '.md)\n'
         let content = ''
         if (value.title) {
-            content = value.title + '\n'
+            content = ">" + value.title + '  \n'
         }
         if (value.details) {
             content = content + value.details + '\n'
@@ -91,26 +98,29 @@ function writeDocs(contents) {
         // loop methods
         if (value.methods) {
             for (let [k, v] of Object.entries(value.methods)) {
-                let methodC = '#### ' + k + '\n'
+                let methodC = '### ' + k.split('(')[0] + '  \n'
                 if (v.details) {
-                    methodC = methodC + v.details + '\n'
+                    methodC = methodC + "?>" + v.details + '  \n'
                 }
                 // set params
-                methodC = methodC + '##### Params:\n            '
-                methodC = methodC + JSON.stringify(v.params) + '\n'
-                // set returns
-                if (v.return) {
-                    methodC = methodC + '##### Returns:\n          ' + v.return + "\n"
+                methodC = methodC + '#### Params:  \n\n'
+                //parse params
+                if (v.params) {
+                    for (let [k2, v2] of Object.entries(v.params)) {
+                        methodC = methodC + "- `" + k2 + "` " + v2 + "  \n"
+                    }
                 }
 
-                // if (k != 'allowance(address,address)') {
-                //     console.log(v)
-                // }
+                // set returns
+                if (v.return) {
+                    methodC = methodC + '\n#### Returns:  \n' + v.return + "  \n"
+                }
+
                 content = content + methodC + '\n'
             }
         }
-        console.log(content)
-        fs.writeFileSync('./docs/' + key + '.md', content)
+        // console.log(content)
+        fs.writeFileSync('./docs/contracts/' + key + '.md', content)
     }
     fs.writeFileSync('./docs/_sidebar.md', side)
 }

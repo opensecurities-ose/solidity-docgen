@@ -4,7 +4,7 @@
   "description": "Solidity API documentation automatic generator.",
   "main": "lib/index.js",
   "bin": {
-    "solidity-docgen": "./bin/solidity-docgen"
+    "solidoc": "./bin/solidoc"
   },
   "scripts": {
     "lint": "standard src/*.js src/**/*.js bin/* test/*.js test/**/*.js",
